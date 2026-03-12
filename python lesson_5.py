@@ -1,5 +1,30 @@
+import requests
 import json
-data_from_internet='{"name":"Siddhant","hours":42,"rate":30}'
-user_dict=json.loads(data_from_internet)
+from bs4 import BeautifulSoup
 
-print(f"data processed for {user_dict['name']}: Total${user_dict['hours'] * user_dict['rate']}")
+job_results = []
+
+def scrape_jobs(url):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    
+    jobs = soup.find_all('h2')
+    print(f"--- Found {len(jobs)} potential listings ---")
+    
+    for job in jobs:
+        title = job.text.strip()
+        print(f"Job Found: {title}")
+        
+        job_data = {
+            "title": title,
+            "source": "Real Python Website"
+        }
+        
+        job_results.append(job_data)
+
+scrape_jobs('https://realpython.github.io/fake-jobs/')
+
+with open("results.json", "w") as f:
+    json.dump(job_results, f, indent=4)
+
+print("File 'results.json' has been created successfully!")
